@@ -3,7 +3,10 @@ import requests
 from collections import namedtuple
 from random import randint
 from bs4 import BeautifulSoup
+from PIL import Image, ImageDraw, ImageFont
+from screeninfo import get_monitors
 
+monitor = get_monitors()[0]
 Color = namedtuple('Color', ['red', 'green', 'blue'])
 
 
@@ -30,7 +33,23 @@ text = quotes[quote_selection].find('div', {'class': 'sodatext'}).text
 #    count = re.findall(r'\d+', likes) or [0]
 # else:
 #    count = [0]
-print(text);
-colors = random_colors()
-for color in colors:
-    print(color);
+img = Image.new('RGB', (monitor.width, monitor.height), color=random_colors())
+draw = ImageDraw.Draw(img)
+
+fontsize = 1  # starting font size
+
+# portion of image width you want text width to be
+img_fraction = 0.90
+
+font = ImageFont.truetype('BlackHanSans-Regular.ttf', fontsize)
+while font.getsize(text)[0] < img_fraction * img.size[0]:
+    # iterate until the text size is just larger than the criteria
+    fontsize += 1
+    font = ImageFont.truetype("BlackHanSans-Regular.ttf", fontsize)
+
+# optionally de-increment to be sure it is less than criteria
+# fontsize -= 1
+# font = ImageFont.truetype('BlackHanSans-Regular.ttf', fontsize)
+draw.text((10, 100), text, fill=random_colors(), font=font)
+img.save('images/' + title + '.png')
+print('done')
